@@ -1,9 +1,9 @@
 {
-    "name": "cambioreal/cambioreal",
+    "name": "kaiorocha/cambioreal",
     "description": "CambioReal PHP library",
     "keywords": ["cambioreal", "payment processing", "api"],
     "homepage": "https://www.cambioreal.com",
-    "license": "BSD",
+    "license": "MIT",
     "require": {
         "php": ">=7.3",
         "ext-curl": "*"
