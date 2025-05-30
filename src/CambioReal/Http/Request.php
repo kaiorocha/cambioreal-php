@@ -118,7 +118,7 @@ class Request
             'http' => [
                 'ignore_errors' => true,
                 'method' => $this->method,
-                'header' => "Content-Type: application/x-www-form-urlencoded \r\n".
+                'header' => "Content-Type: application/json \r\n".
                     'User-Agent: CAMBIOREAL PHP Library '.\CambioReal\CambioReal::VERSION."\r\n".
                     'X-APP-ID: '.Config::getAppId()."\r\n".
                     'X-APP-SECRET: '.Config::getAppSecret(),
