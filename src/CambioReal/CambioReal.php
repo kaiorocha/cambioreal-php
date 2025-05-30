@@ -13,7 +13,7 @@ class CambioReal
      * Library version.
      * @var string
      */
-    public const VERSION = '1.3.1';
+    public const VERSION = '1.4.0';
 
     /**
      * Magic method that calls the Action Factory.
