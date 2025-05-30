@@ -106,7 +106,6 @@ class Request
             throw new \RuntimeException('allow_url_fopen must be enabled to use PHP streams.');
         }
 
-        $params = http_build_query($this->params);
         $uri = $this->action;
 
         if (isset($this->params['token'])) {
@@ -114,11 +113,16 @@ class Request
             unset($this->params['token']);
         }
 
+        $contentType = $this->method === 'GET'
+            ? 'application/x-www-form-urlencoded'
+            : 'application/json';
+
         $contextOptions = [
             'http' => [
                 'ignore_errors' => true,
                 'method' => $this->method,
-                'header' => "Content-Type: application/json \r\n".
+                'header' => "Content-Type: $contentType \r\n".
+                    "Accept: application/json \r\n".
                     'User-Agent: CAMBIOREAL PHP Library '.\CambioReal\CambioReal::VERSION."\r\n".
                     'X-APP-ID: '.Config::getAppId()."\r\n".
                     'X-APP-SECRET: '.Config::getAppSecret(),
@@ -126,21 +130,33 @@ class Request
         ];
 
         if ($this->method !== 'GET') {
-            $contextOptions['http']['content'] = $params;
+            $contextOptions['http']['content'] = json_encode($this->params);
         }
 
         $context = stream_context_create($contextOptions);
 
         $response = file_get_contents($uri, false, $context);
 
-        if ($response && strlen($response)) {
-            if ($this->decodeResponse) {
-                return json_decode($response);
-            }
+        $httpCode = 500;
 
-            return $response;
+        if (isset($http_response_header)) {
+            $httpCode = $this->getHttpCode($http_response_header);
         }
 
-        throw new \RuntimeException("Bad HTTP request: {$response}");
+        if ($httpCode === 200 && $response && strlen($response)) {
+            return $this->decodeResponse
+                ? json_decode($response)
+                : $response;
+        }
+
+        throw new \RuntimeException("Bad HTTP request: $httpCode - $response");
+    }
+
+    protected function getHttpCode($http_response_header)
+    {
+        $statusLine = $http_response_header[0]; // Ex: HTTP/1.1 200 OK
+        preg_match('{HTTP\/\S*\s(\d{3})}', $statusLine, $match);
+
+        return (int) $match[1] ?? 500;
     }
 }
